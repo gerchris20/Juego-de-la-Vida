@@ -1,0 +1,53 @@
+import pygame
+import numpy as np
+import time
+pygame.init()
+W, H = 1000, 1000
+screen = pygame.display.set_mode((H, W))
+bg = 75, 0, 130
+screen.fill(bg)
+nxC, nyC= 60, 60
+pCW= W / nxC
+pCH= H / nyC
+gs= np.zeros ((nxC, nyC))
+gs[10,15]= 1
+gs[10,16]= 1
+gs[10,17]= 1
+se = False
+while True:
+    ngs= np.copy(gs)
+    screen.fill(bg)
+    e  = pygame.event.get()
+    for event in e:
+        if event.type == pygame.KEYDOWN:
+            se = not se
+        ms = pygame.mouse.get_pressed()
+        if sum(ms) > 0:
+            posX, posY= pygame.mouse.get_pos()
+            celX, celY= int(np.floor(posX / pCW)), int(np.floor(posY/pCH))
+            ngs[celX, celY]= not ms[2]
+    for y in range(0,nxC):
+                    for x in range(0,nyC):
+                        if not se:
+                            n_neigh= gs[(x-1)% nxC,(y-1)% nyC]+\
+                            gs[(x-1)% nxC,(y+1)% nyC]+\
+                            gs[(x)% nxC,(y-1)% nyC]+\
+                            gs[(x)% nxC,(y+1)% nyC]+\
+                            gs[(x+1)% nxC,(y-1)% nyC]+\
+                            gs[(x+1)% nxC,(y)% nyC]+\
+                            gs[(x-1)% nxC,(y)% nyC]+\
+                            gs[(x+1)% nxC,(y+1)% nyC]
+                            if gs[x, y] == 0 and n_neigh ==3:
+                                ngs[x, y] = 1
+                            elif gs [x, y]==1 and (n_neigh <2 or n_neigh > 3):
+                                ngs[x, y] = 0
+                        p=   [((x)   * pCW, y * pCH),
+                                    ((x+1)   * pCW, y * pCH),
+                                    ((x+1)   * pCW, (y+1) * pCH),
+                                    ((x)   * pCW, (y+1) * pCH)]
+                        if ngs[x, y]== 0:
+                                pygame.draw.polygon(screen, (128, 128, 128), p, 1)
+                        else:
+                                pygame.draw.polygon(screen, (139, 0, 0), p, 0)
+    gs= np.copy(ngs) 
+    pygame.display.flip()
